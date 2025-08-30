@@ -1,0 +1,1021 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juiceboxova zbrojárna</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6e8e6; /* Light gray */
+            color: #1a3c34; /* Dark green */
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            text-align: center;
+            background-color: #2e5c4d; /* Darker green */
+            color: #e6e8e6;
+            padding: 20px;
+        }
+        header h1 {
+            margin: 0;
+        }
+        header p {
+            margin: 5px 0 0;
+        }
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .filter-section {
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .filter-section label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .filter-section select, .filter-section input {
+            padding: 5px;
+            font-size: 1em;
+            background-color: #f5f6f5;
+            border: 1px solid #a3b1a8;
+            color: #1a3c34;
+        }
+        .filter-section input {
+            width: 200px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .tank-card {
+            background-color: #f5f6f5; /* Very light gray */
+            border: 1px solid #a3b1a8; /* Medium gray */
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tank-card summary {
+            cursor: pointer;
+            background-color: #3d7b66; /* Medium dark green */
+            color: #e6e8e6;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .tank-details {
+            padding: 15px;
+        }
+        .tank-details h3 {
+            margin-top: 15px;
+            border-bottom: 1px solid #a3b1a8;
+            padding-bottom: 5px;
+        }
+        .tank-details ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Juiceboxova zbrojárna</h1>
+        <p>Vítejte, velitelé! Váš průvodce nejlepšími sestavami pro klanové války ve World of Tanks.</p>
+    </header>
+    <main>
+        <div class="filter-section">
+            <div>
+                <label for="sort-by">Seřadit podle:</label>
+                <select id="sort-by">
+                    <option value="name">Název (A-Z)</option>
+                    <option value="tier">Úroveň</option>
+                    <option value="nation">Národ</option>
+                    <option value="type">Typ tanku</option>
+                </select>
+            </div>
+            <div>
+                <label for="search-tank">Hledat tank:</label>
+                <input type="text" id="search-tank" placeholder="Zadejte název tanku...">
+            </div>
+        </div>
+        <div class="gallery">
+            <!-- Light Tanks -->
+            <details class="tank-card" data-type="Lehký tank" data-name="Manticore" data-nation="UK">
+                <summary>Manticore (Lehký tank, Úroveň X, UK)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené větrání, Stabilizátor zaměřovače, Pokrytá optika</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Maskování, Průzkum</li>
+                        <li>Střelec: Maskování, Plynulý výstřel, Smrtící přesnost</li>
+                        <li>Řidič: Maskování, Plynulá jízda, Jízda v terénu</li>
+                        <li>Nabíječ: Maskování, Intuice, Bezpečné uložení</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Paralaxní úprava, Lapování zaměřovacích převodů, Zvuková izolace</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>30 APCR (prémiové), 15 AP, 5 HE – Up peasants pohyblivost a průzkum před poškozením.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Automatický hasicí přístroj, Velká opravná sada, Velká lékárnička</p>
+                </div指标
+
+System: ```html
+<xaiArtifact artifact_id="9ec7a32e-3826-426d-88fc-d515d29d7dd4" artifact_version_id="06251be4-1db7-401b-a601-f7ff65e407be" title="index.html" contentType="text/html">
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juiceboxova zbrojárna</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6e8e6; /* Light gray */
+            color: #1a3c34; /* Dark green */
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            text-align: center;
+            background-color: #2e5c4d; /* Darker green */
+            color: #e6e8e6;
+            padding: 20px;
+        }
+        header h1 {
+            margin: 0;
+        }
+        header p {
+            margin: 5px 0 0;
+        }
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .filter-section {
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .filter-section label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .filter-section select, .filter-section input {
+            padding: 5px;
+            font-size: 1em;
+            background-color: #f5f6f5;
+            border: 1px solid #a3b1a8;
+            color: #1a3c34;
+        }
+        .filter-section input {
+            width: 200px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .tank-card {
+            background-color: #f5f6f5; /* Very light gray */
+            border: 1px solid #a3b1a8; /* Medium gray */
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tank-card summary {
+            cursor: pointer;
+            background-color: #3d7b66; /* Medium dark green */
+            color: #e6e8e6;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .tank-details {
+            padding: 15px;
+        }
+        .tank-details h3 {
+            margin-top: 15px;
+            border-bottom: 1px solid #a3b1a8;
+            padding-bottom: 5px;
+        }
+        .tank-details ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Juiceboxova zbrojárna</h1>
+        <p>Vítejte, velitelé! Váš průvodce nejlepšími sestavami pro klanové války ve World of Tanks.</p>
+    </header>
+    <main>
+        <div class="filter-section">
+            <div>
+                <label for="sort-by">Seřadit podle:</label>
+                <select id="sort-by">
+                    <option value="name">Název (A-Z)</option>
+                    <option value="tier">Úroveň</option>
+                    <option value="nation">Národ</option>
+                    <option value="type">Typ tanku</option>
+                </select>
+            </div>
+            <div>
+                <label for="search-tank">Hledat tank:</label>
+                <input type="text" id="search-tank" placeholder="Zadejte název tanku...">
+            </div>
+        </div>
+        <div class="gallery">
+            <!-- Light Tanks -->
+            <details class="tank-card" data-type="Lehký tank" data-name="Manticore" data-nation="UK">
+                <summary>Manticore (Lehký tank, Úroveň X, UK)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené větrání, Stabilizátor zaměřovače, Pokrytá optika</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Maskování, Průzkum</li>
+                        <li>Střelec: Maskování, Plynulý výstřel, Smrtící přesnost</li>
+                        <li>Řidič: Maskování, Plynulá jízda, Jízda v terénu</li>
+                        <li>Nabíječ: Maskování, Intuice, Bezpečné uložení</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Paralaxní úprava, Lapování zaměřovacích převodů, Zvuková izolace</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>30 APCR (prémiové), 15 AP, 5 HE – Upřednostněte pohyblivost a průzkum před poškozením.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Automatický hasicí přístroj, Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Lehký tank" data-name="EBR 105" data-nation="Francie">
+                <summary>EBR 105 (Lehký tank, Úroveň X, Francie)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Turbo, Pokrytá optika, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Maskování, Situační povědomí</li>
+                        <li>Střelec: Maskování, Plynulý výstřel, Smrtící přesnost</li>
+                        <li>Řidič: Maskování, Plynulá jízda, Jízda v terénu</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Zvuková izolace, Vylepšené odpružení, Lehké pásy</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 15 AP, 5 HE – Rychlé průzkumné mise.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Kávový doplněk (prémiový), Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <!-- Medium Tanks -->
+            <details class="tank-card" data-type="Střední tank" data-name="CS-63" data-nation="Polsko">
+                <summary>CS-63 (Střední tank, Úroveň X, Polsko)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Turbo, Vylepšené větrání, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Intuice, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšené odpružení, Lehký pancíř, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 HEAT (prémiové), 20 AP, 5 HE – Vysoká průraznost pro klanové války.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Prémiový český guláš, Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Střední tank" data-name="Obj. 140" data-nation="SSSR">
+                <summary>Obj. 140 (Střední tank, Úroveň X, SSSR)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Stabilizátor zaměřovače, Vylepšené větrání, Nabíječ</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Průzkum</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Smrtící přesnost</li>
+                        <li>Řidič: Opravy, Plynulá jízda, Jízda v terénu</li>
+                        <li>Nabíječ: Opravy, Intuice, Bezpečné uložení</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Lehký pancíř, Parallaxní úprava</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 20 AP, 5 HE – Všestrannost v boji.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Vodka (prémiová), Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Střední tank" data-name="K-91" data-nation="SSSR">
+                <summary>K-91 (Střední tank, Úroveň X, SSSR)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Stabilizátor zaměřovače, Vylepšené větrání, Pokrytá optika</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Situační povědomí</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Smrtící přesnost</li>
+                        <li>Řidič: Opravy, Plynulá jízda, Jízda v terénu</li>
+                        <li>Nabíječ: Opravy, Intuice, Bezpečné uložení</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Paralaxní úprava, Vylepšená montáž, Zvuková izolace</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>30 APCR (prémiové), 15 AP, 5 HE – Zaměření na průraznost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Vodka (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Střední tank" data-name="Progetto 65" data-nation="Itálie">
+                <summary>Progetto 65 (Střední tank, Úroveň X, Itálie)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Nabíječ, Stabilizátor zaměřovače, Vylepšené větrání</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Plynulá jízda, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Intuice, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Lehký pancíř, Parallaxní úprava</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 20 AP, 5 HE – Vysoká kadence střelby.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Espresso (prémiové), Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Střední tank" data-name="BC 25 t" data-nation="Francie">
+                <summary>BC 25 t (Střední tank, Úroveň X, Francie)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Stabilizátor zaměřovače, Vylepšené větrání, Pokrytá optika</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Situační povědomí</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Smrtící přesnost</li>
+                        <li>Řidič: Opravy, Plynulá jízda, Jízda v terénu</li>
+                        <li>Nabíječ: Opravy, Intuice, Bezpečné uložení</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Lehký pancíř, Vylepšené odpružení, Parallaxní úprava</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 20 AP, 5 HE – Rychlé útoky a přesuny.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Kávový doplněk (prémiový), Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Střední tank" data-name="E 50 M" data-nation="Německo">
+                <summary>E 50 M (Střední tank, Úroveň X, Německo)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Stabilizátor zaměřovače, Nabíječ, Vylepšené větrání</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Intuice, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Lehký pancíř, Vylepšené odpružení</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 20 AP, 5 HE – Všestranná bojová role.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Čokoláda (prémiová), Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Střední tank" data-name="Leopard 1" data-nation="Německo">
+                <summary>Leopard 1 (Střední tank, Úroveň X, Německo)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Stabilizátor zaměřovače, Pokrytá optika, Nabíječ</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Průzkum</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Smrtící přesnost</li>
+                        <li>Řidič: Opravy, Plynulá jízda, Jízda v terénu</li>
+                        <li>Nabíječ: Opravy, Intuice, Bezpečné uložení</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Paralaxní úprava, Vylepšená montáž, Zvuková izolace</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>30 APCR (prémiové), 15 AP, 5 HE – Zaměření na přesnost a průraznost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Čokoláda (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Střední tank" data-name="Centurion AX" data-nation="UK">
+                <summary>Centurion AX (Střední tank, Úroveň X, UK)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Stabilizátor zaměřovače, Nabíječ, Vylepšené větrání</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Plynulá jízda, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Intuice, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Lehký pancíř, Parallaxní úprava</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 HESH (prémiové), 20 AP, 5 HE – Vysoká průraznost a poškození.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Čaj (prémiový), Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Střední tank" data-name="TVP T 50/51" data-nation="Československo">
+                <summary>TVP T 50/51 (Střední tank, Úroveň X, Československo)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Nabíječ, Stabilizátor zaměřovače, Vylepšené větrání</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Plynulá jízda, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Intuice, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Lehký pancíř, Parallaxní úprava</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 20 AP, 5 HE – Rychlá střelba a poškození.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Prémiový český guláš, Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <!-- Heavy Tanks -->
+            <details class="tank-card" data-type="Těžký tank" data-name="Maus" data-nation="Německo">
+                <summary>Maus (Těžký tank, Úroveň X, Německo)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Všestranný</li>
+                        <li>Střelec: Opravy, Smrtící přesnost, Zbrojíř</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Jízda v terénu</li>
+                        <li>Radiotelegrafista: Opravy, Situační povědomí, Zesílení signálu</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Adrenalinový nával</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Dodatkové pásy, Těžký pancíř, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Vyvážená munice pro přední linie.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Automatický hasicí přístroj, Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="IS-7" data-nation="SSSR">
+                <summary>IS-7 (Těžký tank, Úroveň X, SSSR)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Stabilizátor zaměřovače, Nabíječ</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Zaměření na průraznost a odolnost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Vodka (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="IS-4" data-nation="SSSR">
+                <summary>IS-4 (Těžký tank, Úroveň X, SSSR)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Všestranný</li>
+                        <li>Střelec: Opravy, Smrtící přesnost, Zbrojíř</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Jízda v terénu</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Adrenalinový nával</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Silná odolnost pro přední linie.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Vodka (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="Vz. 55" data-nation="Československo">
+                <summary>Vz. 55 (Těžký tank, Úroveň X, Československo)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Nabíječ, Stabilizátor zaměřovače, Vylepšené zpevnění</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Intuice, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Těžký pancíř, Dodatkové pásy</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 15 AP, 5 HE – Vysoké poškození a průraznost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Prémiový český guláš, Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="S. Conqueror" data-nation="UK">
+                <summary>S. Conqueror (Těžký tank, Úroveň X, UK)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Stabilizátor zaměřovače, Nabíječ, Vylepšené zpevnění</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Intuice, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Těžký pancíř, Dodatkové pásy</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 HESH (prémiové), 20 AP, 5 HE – Vysoká průraznost a poškození.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Čaj (prémiový), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="Canopener" data-nation="Německo">
+                <summary>Canopener (Těžký tank, Úroveň X, Německo)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Všestranný</li>
+                        <li>Střelec: Opravy, Smrtící přesnost, Zbrojíř</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Jízda v terénu</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Adrenalinový nával</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Silná odolnost a průraznost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Čokoláda (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="AMX 50 B" data-nation="Francie">
+                <summary>AMX 50 B (Těžký tank, Úroveň X, Francie)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Nabíječ, Stabilizátor zaměřovače, Vylepšené větrání</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Plynulá jízda, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Intuice, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Lehký pancíř, Parallaxní úprava</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 20 AP, 5 HE – Vysoká kadence střelby.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Kávový doplněk (prémiový), Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="T57 Heavy" data-nation="USA">
+                <summary>T57 Heavy (Těžký tank, Úroveň X, USA)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Nabíječ, Stabilizátor zaměřovače, Vylepšené větrání</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Plynulá jízda, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Intuice, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Lehký pancíř, Parallaxní úprava</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 20 AP, 5 HE – Vysoké poškození za salvu.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Kávový doplněk (prémiový), Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="T110E5" data-nation="USA">
+                <summary>T110E5 (Těžký tank, Úroveň X, USA)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Všestranný</li>
+                        <li>Střelec: Opravy, Smrtící přesnost, Zbrojíř</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Jízda v terénu</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Adrenalinový nával</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Vyvážená munice pro přední linie.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Automatický hasicí přístroj, Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="Obj. 277" data-nation="SSSR">
+                <summary>Obj. 277 (Těžký tank, Úroveň X, SSSR)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Stabilizátor zaměřovače, Nabíječ</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Rychlost a průraznost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Vodka (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="Kpz 07 P(E)" data-nation="Německo">
+                <summary>Kpz 07 P(E) (Těžký tank, Úroveň X, Německo)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Všestranný</li>
+                        <li>Střelec: Opravy, Smrtící přesnost, Zbrojíř</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Jízda v terénu</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Adrenalinový nával</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Silná odolnost a průraznost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Čokoláda (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="Obj. 780" data-nation="SSSR">
+                <summary>Obj. 780 (Těžký tank, Úroveň X, SSSR)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Vysoká průraznost a odolnost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Vodka (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Těžký tank" data-name="Obj. 452K" data-nation="SSSR">
+                <summary>Obj. 452K (Těžký tank, Úroveň X, SSSR)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Silná odolnost a průraznost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Vodka (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <!-- Tank Destroyers -->
+            <details class="tank-card" data-type="Stíhač tanků" data-name="Obj. 268/4" data-nation="SSSR">
+                <summary>Obj. 268/4 (Stíhač tanků, Úroveň X, SSSR)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Pokrytá optika</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Vysoká průraznost pro defenzivní pozice.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Vodka (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Stíhač tanků" data-name="Jg.Pz. E 100" data-nation="Německo">
+                <summary>Jg.Pz. E 100 (Stíhač tanků, Úroveň X, Německo)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Stabilizátor zaměřovače</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Všestranný</li>
+                        <li>Střelec: Opravy, Smrtící přesnost, Zbrojíř</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Jízda v terénu</li>
+                        <li>Radiotelegrafista: Opravy, Situační povědomí, Zesílení signálu</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Adrenalinový nával</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>15 HEAT (prémiové), 15 AP, 10 HE – Vysoké poškození na výstřel.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Čokoláda (prémiová), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Stíhač tanků" data-name="T110E3" data-nation="USA">
+                <summary>T110E3 (Stíhač tanků, Úroveň X, USA)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Vylepšené zpevnění, Nabíječ, Pokrytá optika</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Těžký pancíř, Dodatkové pásy, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Silná průraznost a odolnost.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Kávový doplněk (prémiový), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Stíhač tanků" data-name="Ho-Ri 3" data-nation="Japonsko">
+                <summary>Ho-Ri 3 (Stíhač tanků, Úroveň X, Japonsko)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Nabíječ, Stabilizátor zaměřovače, Pokrytá optika</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Opravy, Bratři ve zbrani</li>
+                        <li>Střelec: Opravy, Plynulý výstřel, Bratři ve zbrani</li>
+                        <li>Řidič: Opravy, Spojkové brzdění, Bratři ve zbrani</li>
+                        <li>Nabíječ: Opravy, Bezpečné uložení, Bratři ve zbrani</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Vylepšená montáž, Těžký pancíř, Dodatkové pásy</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>20 APCR (prémiové), 20 AP, 10 HE – Vysoká průraznost na dálku.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Onigiri (prémiové), Velká opravná sada, Velká lékárnička</p>
+                </div>
+            </details>
+            <details class="tank-card" data-type="Stíhač tanků" data-name="Strv 103B" data-nation="Švédsko">
+                <summary>Strv 103B (Stíhač tanků, Úroveň X, Švédsko)</summary>
+                <div class="tank-details">
+                    <h3>Vybavení</h3>
+                    <p>Pokrytá optika, Nabíječ, Vylepšené větrání</p>
+                    
+                    <h3>Dovednosti posádky</h3>
+                    <ul>
+                        <li>Velitel: Šestý smysl, Maskování, Průzkum</li>
+                        <li>Střelec: Maskování, Plynulý výstřel, Smrtící přesnost</li>
+                        <li>Řidič: Maskování, Plynulá jízda, Jízda v terénu</li>
+                    </ul>
+                    
+                    <h3>Polní modifikace</h3>
+                    <p>Paralaxní úprava, Zvuková izolace, Vylepšená montáž</p>
+                    
+                    <h3>Náboje</h3>
+                    <p>25 APCR (prémiové), 15 AP, 5 HE – Zaměření na přesnost a maskování.</p>
+                    
+                    <h3>Spotřební předměty</h3>
+                    <p>Kávový doplněk (prémiový), Malá opravná sada, Malá lékárnička</p>
+                </div>
+            </details>
+        </div>
+    </main>
+    <script>
+        const sortSelect = document.getElementById('sort-by');
+        const searchInput = document.getElementById('search-tank');
+        const gallery = document.querySelector('.gallery');
+        const cards = Array.from(gallery.querySelectorAll('.tank-card'));
+
+        // Sorting functionality
+        sortSelect.addEventListener('change', function() {
+            const sortBy = this.value;
+            cards.sort((a, b) => {
+                const aText = a.dataset[sortBy].toLowerCase();
+                const bText = b.dataset[sortBy].toLowerCase();
+                return aText.localeCompare(bText);
+            });
+            gallery.innerHTML = '';
+            cards.forEach(card => gallery.appendChild(card));
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            cards.forEach(card => {
+                const tankName = card.dataset.name.toLowerCase();
+                card.classList.toggle('hidden', !tankName.includes(searchTerm));
+            });
+        });
+    </script>
+</body>
+</html>
